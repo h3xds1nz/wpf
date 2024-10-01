@@ -46,17 +46,16 @@ namespace System.Windows.Documents
 
         public FixedDSBuilder(FixedPage fp, StoryFragments sf)
         {
-            _nameHashTable = new Dictionary<String, NameHashFixedNode>();
+            _nameHashTable = new Dictionary<string, NameHashFixedNode>();
             _fixedPage = fp;
             _storyFragments = sf;
         }
 
-        public void BuildNameHashTable(String Name, UIElement e, int indexToFixedNodes)
+        public void BuildNameHashTable(string Name, UIElement e, int indexToFixedNodes)
         {
             if (!_nameHashTable.ContainsKey(Name))
             {
-                _nameHashTable.Add(Name,
-                    new NameHashFixedNode(e,indexToFixedNodes));
+                _nameHashTable.Add(Name, new NameHashFixedNode(e,indexToFixedNodes));
             }
         }
 
@@ -117,12 +116,10 @@ namespace System.Windows.Documents
                 // Debug.Assert(false, "An element is referenced in the document structure multiple times");
                 return; // ignore this reference
             }
-            FixedNode fn = (FixedNode)_fixedNodes[index];
+            FixedNode fn = _fixedNodes[index];
 
-            if (e == null)
-            {
+            if (e is null)
                 e = _fixedPage.GetElement(fn) as UIElement;
-            }
 
             _visitedArray[index] = true;
 
@@ -164,7 +161,7 @@ namespace System.Windows.Documents
                     _flowBuilder.AddStartNode(be.ElementType);
 
                     //Set the culture info on this node
-                    XmlLanguage language = (XmlLanguage) _fixedPage.GetValue(FrameworkElement.LanguageProperty);
+                    XmlLanguage language = (XmlLanguage)_fixedPage.GetValue(FrameworkElement.LanguageProperty);
                     _flowBuilder.FixedElement.SetValue(FixedElement.LanguageProperty, language);
 
                     SpecialProcessing(sbe);
@@ -188,7 +185,7 @@ namespace System.Windows.Documents
         private void AddChildofFixedNodeinFlow(int[] childIndex, NamedElement ne)
         {
             // Create a fake FixedNode to help binary search.
-            FixedNode fn = FixedNode.Create(((FixedNode)_fixedNodes[0]).Page, childIndex);
+            FixedNode fn = FixedNode.Create(_fixedNodes[0].Page, childIndex);
             // Launch the binary search to find the matching FixedNode 
             int index = _fixedNodes.BinarySearch(fn);
 
@@ -198,7 +195,7 @@ namespace System.Windows.Documents
                 // Search backward for the first Node in this scope
                 for (startIndex = index - 1; startIndex >= 0; startIndex--)
                 {
-                    fn = (FixedNode)_fixedNodes[startIndex];
+                    fn = _fixedNodes[startIndex];
                     if (fn.ComparetoIndex(childIndex) != 0)
                     {
                         break;
@@ -208,7 +205,7 @@ namespace System.Windows.Documents
                 // Search forward to add all the nodes in order.
                 for (int i = startIndex+1; i < _fixedNodes.Count; i++)
                 {
-                    fn = (FixedNode)_fixedNodes[i];
+                    fn = _fixedNodes[i];
                     if (fn.ComparetoIndex(childIndex) == 0)
                     {
                         AddFixedNodeInFlow(i, null);
@@ -220,11 +217,10 @@ namespace System.Windows.Documents
 
         private void SpecialProcessing(SemanticBasicElement sbe)
         {
-            Ds.ListItemStructure listItem = sbe as Ds.ListItemStructure;
+            ListItemStructure listItem = sbe as ListItemStructure;
             if (listItem != null && listItem.Marker != null)
             {
-                NameHashFixedNode fen;
-                if (_nameHashTable.TryGetValue(listItem.Marker, out fen) == true)
+                if (_nameHashTable.TryGetValue(listItem.Marker, out NameHashFixedNode fen) == true)
                 {
                     _visitedArray[fen.Index] = true;
                 }
@@ -233,8 +229,7 @@ namespace System.Windows.Documents
 
         private void ConstructSomElement(NamedElement ne)
         {
-            NameHashFixedNode fen;
-            if (_nameHashTable.TryGetValue(ne.NameReference, out fen) == true)
+            if (_nameHashTable.TryGetValue(ne.NameReference, out NameHashFixedNode fen) == true)
             {
                 if (fen.UIElement is Glyphs || fen.UIElement is Path ||
                     fen.UIElement is Image)
@@ -260,7 +255,7 @@ namespace System.Windows.Documents
         private FixedPage _fixedPage;  
         private List<FixedNode> _fixedNodes;
         private BitArray _visitedArray;
-        private Dictionary<String, NameHashFixedNode> _nameHashTable;
+        private Dictionary<string, NameHashFixedNode> _nameHashTable;
         private FixedTextBuilder.FlowModelBuilder _flowBuilder;
    }
 }
