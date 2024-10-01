@@ -122,7 +122,7 @@ namespace System.Windows.Documents
         /// This function will create the flow node corresponding to this BlockElement.
         /// This function will call itself recursively.
         /// </summary>
-        /// <param name="be"></param>
+        /// <param name="blockElement"></param>
         private void CreateFlowNodes(BlockElement blockElement)
         {
             //
@@ -219,7 +219,7 @@ namespace System.Windows.Documents
             {
                 if (fen.UIElement is Glyphs || fen.UIElement is Path || fen.UIElement is Image)
                 {
-                    // Elements that can't have childrent
+                    // Elements that can't have children
                     AddFixedNodeInFlow(fen.Index, fen.UIElement);
                 }
                 else
@@ -227,7 +227,7 @@ namespace System.Windows.Documents
                     if (fen.UIElement is Canvas)
                     {
                         // We need to find all the fixed nodes inside the scope of 
-                        // this grouping element, add all of them in the arraylist.
+                        // this grouping element, add all of them in the list.
                         int[] childIndex = _fixedPage._CreateChildIndex(fen.UIElement);
 
                         AddChildofFixedNodeinFlow(childIndex);
