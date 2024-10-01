@@ -251,11 +251,12 @@ namespace System.Windows.Documents
             }
         }
 
-        private StoryFragments _storyFragments;
-        private FixedPage _fixedPage;  
+        private readonly Dictionary<string, NameHashFixedNode> _nameHashTable;
+        private readonly StoryFragments _storyFragments;
+        private readonly FixedPage _fixedPage;
+
         private List<FixedNode> _fixedNodes;
         private BitArray _visitedArray;
-        private Dictionary<string, NameHashFixedNode> _nameHashTable;
         private FixedTextBuilder.FlowModelBuilder _flowBuilder;
    }
 }
