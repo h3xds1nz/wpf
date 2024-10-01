@@ -44,10 +44,7 @@ namespace System.Windows.Documents
 
         public void BuildNameHashTable(string name, UIElement element, int indexToFixedNodes)
         {
-            if (!_nameHashTable.ContainsKey(name))
-            {
-                _nameHashTable.Add(name, new NameHashFixedNode(element, indexToFixedNodes));
-            }
+            _nameHashTable.TryAdd(name, new NameHashFixedNode(element, indexToFixedNodes));
         }
 
         public StoryFragments StoryFragments
