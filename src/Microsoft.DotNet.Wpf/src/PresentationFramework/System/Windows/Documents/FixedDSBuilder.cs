@@ -32,16 +32,17 @@ namespace System.Windows.Documents
     /// </summary>
     internal sealed class FixedDSBuilder
     {
-        class NameHashFixedNode
+        private readonly struct NameHashFixedNode
         {
-            internal NameHashFixedNode(UIElement e, int i)
-            {
-                uiElement = e; index = i;
-            }
-            internal UIElement uiElement;
-            internal int index;
-        }
+            public readonly int Index { get; }
+            public readonly UIElement UIElement { get; }
 
+            internal NameHashFixedNode(UIElement uiElement, int index)
+            {
+                UIElement = uiElement;
+                Index = index;
+            }
+        }
 
         public FixedDSBuilder(FixedPage fp, StoryFragments sf)
         {
@@ -225,7 +226,7 @@ namespace System.Windows.Documents
                 NameHashFixedNode fen;
                 if (_nameHashTable.TryGetValue(listItem.Marker, out fen) == true)
                 {
-                    _visitedArray[fen.index] = true;
+                    _visitedArray[fen.Index] = true;
                 }
             }
         }
@@ -235,19 +236,19 @@ namespace System.Windows.Documents
             NameHashFixedNode fen;
             if (_nameHashTable.TryGetValue(ne.NameReference, out fen) == true)
             {
-                if (fen.uiElement is Glyphs || fen.uiElement is Path ||
-                    fen.uiElement is Image)
+                if (fen.UIElement is Glyphs || fen.UIElement is Path ||
+                    fen.UIElement is Image)
                 {
                     // Elements that can't have childrent
-                    AddFixedNodeInFlow(fen.index, fen.uiElement);
+                    AddFixedNodeInFlow(fen.Index, fen.UIElement);
                 }
                 else
                 {
-                    if (fen.uiElement is Canvas)
+                    if (fen.UIElement is Canvas)
                     {
                         // We need to find all the fixed nodes inside the scope of 
                         // this grouping element, add all of them in the arraylist.
-                        int[] childIndex = _fixedPage._CreateChildIndex(fen.uiElement);
+                        int[] childIndex = _fixedPage._CreateChildIndex(fen.UIElement);
 
                         AddChildofFixedNodeinFlow(childIndex, ne);
                     }
