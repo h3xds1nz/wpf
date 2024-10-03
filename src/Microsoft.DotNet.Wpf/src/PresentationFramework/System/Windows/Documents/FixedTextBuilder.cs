@@ -925,7 +925,7 @@ namespace System.Windows.Documents
 
         private void _GetFixedNodes(
                                     FixedPageStructure pageStructure,
-                                    IEnumerable oneLevel,
+                                    UIElementCollection oneLevel,
                                     int nestingLevel,       // the level of nesting
                                     int level1Index,        // if nesting level == 2, this is leve1 1 index
                                     int[] pathPrefix,   // if nesting level > 2, this is used to represent prefix, otherwise it is null
@@ -970,23 +970,12 @@ namespace System.Windows.Documents
                 {
                     pageStructure.PageConstructor.ProcessPath(elements.Current as Path, transform);
                 }
-                else if (elements.Current is Canvas)
+                else if (elements.Current is Canvas canvas)
                 {
-                    Transform localTransform = Transform.Identity;
+                    Transform localTransform = canvas.RenderTransform ?? Transform.Identity;
+                    UIElementCollection children = canvas.Children;
 
                     // Drill down to next level
-                    IEnumerable children;
-
-                    Canvas canvas = elements.Current as Canvas;
-
-                    children       = canvas.Children;
-                    localTransform = canvas.RenderTransform;
-
-                    if (localTransform == null)
-                    {
-                        localTransform = Transform.Identity;
-                    }
-
                     if (children != null)
                     {
                         int[] newPathPrefix = null;
