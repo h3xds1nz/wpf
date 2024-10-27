@@ -184,9 +184,7 @@ namespace System.Windows.Documents
 
             _compositionModifiedByEventListener = true;
 
-            IntPtr hwnd = IntPtr.Zero;
-
-            hwnd = ((IWin32Window)_source).Handle;
+            IntPtr hwnd = ((IWin32Window)_source).Handle;
 
             IntPtr himc = UnsafeNativeMethods.ImmGetContext(new HandleRef(this, hwnd));
             if (himc != IntPtr.Zero)
@@ -831,8 +829,7 @@ namespace System.Windows.Documents
                 //
                 // Build up an array of resultChars + compositionChars -- the complete span of changing text.
                 //
-                int resultLength;
-                string compositionString = BuildCompositionString(resultChars, compositionChars, out resultLength);
+                string compositionString = BuildCompositionString(resultChars, compositionChars, out int resultLength);
 
                 if (compositionString == null)
                 {
@@ -910,7 +907,7 @@ namespace System.Windows.Documents
         /// <param name="compositionChars"></param>
         /// <param name="resultLength"></param>
         /// <returns></returns>
-        private string BuildCompositionString(char[] resultChars, char[] compositionChars, out int resultLength)
+        private static string BuildCompositionString(char[] resultChars, char[] compositionChars, out int resultLength)
         {
             int compositionLength = compositionChars == null ? 0 : compositionChars.Length;
             resultLength = resultChars == null ? 0 : resultChars.Length;
