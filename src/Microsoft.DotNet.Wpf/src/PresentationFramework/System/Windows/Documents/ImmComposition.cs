@@ -11,6 +11,7 @@ using MS.Win32;
 using MS.Internal.Documents;
 using MS.Internal;
 using MS.Internal.Interop;
+using System.Runtime.CompilerServices;
 
 namespace System.Windows.Documents
 {
@@ -1300,7 +1301,7 @@ namespace System.Windows.Documents
         //
         // WM_IME_REQUEST/IMR_RECONVERTSTRING handler
         //
-        private IntPtr OnWmImeRequest_ReconvertString(IntPtr lParam, ref bool handled, bool fDocFeed)
+        private unsafe nint OnWmImeRequest_ReconvertString(nint lParam, ref bool handled, bool fDocFeed)
         {
             if (!fDocFeed)
             {
@@ -1327,53 +1328,43 @@ namespace System.Windows.Documents
             }
 
             string target = range.Text;
-
-            int requestSize = Marshal.SizeOf(typeof(NativeMethods.RECONVERTSTRING)) + (target.Length * sizeof(short)) + ((_maxSrounding + 1) * sizeof(short) * 2);
-            IntPtr lret = new IntPtr(requestSize);
+            int requestSize = sizeof(NativeMethods.RECONVERTSTRING) + (target.Length * sizeof(char)) + ((_maxSrounding + 1) * sizeof(char) * 2);
 
             if (lParam != IntPtr.Zero)
             {
-                int offsetStart;
-                string surrounding = GetSurroundingText(range, out offsetStart);
+                string surroundingText = GetSurroundingText(range, out int offsetStart);
 
                 // Create RECONVERTSTRING structure from lParam.
-                NativeMethods.RECONVERTSTRING reconv = Marshal.PtrToStructure<NativeMethods.RECONVERTSTRING>(lParam);
+                ref NativeMethods.RECONVERTSTRING reconv = ref Unsafe.AsRef<NativeMethods.RECONVERTSTRING>((void*)lParam);
 
                 reconv.dwSize = requestSize;
                 reconv.dwVersion = 0;                                                         // must be 0
-                reconv.dwStrLen = surrounding.Length;                                         // in char count
-                reconv.dwStrOffset = Marshal.SizeOf(typeof(NativeMethods.RECONVERTSTRING));   // in byte count
+                reconv.dwStrLen = surroundingText.Length;                                     // in char count
+                reconv.dwStrOffset = sizeof(NativeMethods.RECONVERTSTRING);                   // in byte count
                 reconv.dwCompStrLen = target.Length;                                          // in char count
-                reconv.dwCompStrOffset = offsetStart * sizeof(short);                         // in byte count
+                reconv.dwCompStrOffset = offsetStart * sizeof(char);                          // in byte count
                 reconv.dwTargetStrLen = target.Length;                                        // in char count
-                reconv.dwTargetStrOffset = offsetStart * sizeof(short);                       // in byte count
+                reconv.dwTargetStrOffset = offsetStart * sizeof(char);                        // in byte count
 
                 if (!fDocFeed)
                 {
                     //
-                    // If this is IMR_RECONVERTSTRING, we cache it. So we can refer it later when we get
+                    // If this is IMR_RECONVERTSTRING, we cache (copy) it. So we can refer it later when we get
                     // IMR_CONFIRMRECONVERTSTRING message.
                     //
                     _reconv = reconv;
                     _isReconvReady = true;
                 }
 
-                // Copy the strucuture back to lParam.
-                Marshal.StructureToPtr(reconv, lParam, true);
-
-                StoreSurroundingText(lParam, surrounding);
+                // Copy the string to the pointer right after the structure.
+                Span<char> reconvertBuffer = new((byte*)lParam + sizeof(NativeMethods.RECONVERTSTRING), surroundingText.Length);
+                surroundingText.CopyTo(reconvertBuffer);
             }
 
+            // Mark message as handled
             handled = true;
-            return lret;
-        }
 
-        private unsafe static void StoreSurroundingText(IntPtr reconv, string surrounding)
-        {
-            // Copy the string to the pointer right after the structure.
-            byte* p = (byte*)reconv.ToPointer();
-            p += Marshal.SizeOf(typeof(NativeMethods.RECONVERTSTRING));
-            Marshal.Copy(surrounding.ToCharArray(), 0, new IntPtr((void*)p), surrounding.Length);
+            return requestSize;
         }
 
         //
@@ -1384,7 +1375,7 @@ namespace System.Windows.Documents
         {
             ITextPointer navigator;
             bool done;
-            string surrounding = "";
+            string surrounding = string.Empty;
             int bufLength;
 
             //
