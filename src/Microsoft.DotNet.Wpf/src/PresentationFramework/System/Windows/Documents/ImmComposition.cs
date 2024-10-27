@@ -1330,11 +1330,12 @@ namespace System.Windows.Documents
             string target = range.Text;
             int requestSize = sizeof(NativeMethods.RECONVERTSTRING) + (target.Length * sizeof(char)) + ((_maxSrounding + 1) * sizeof(char) * 2);
 
+            // If lParam is set to NULL, we just return the size for the buffer required to hold the structure/data.
             if (lParam != IntPtr.Zero)
             {
                 string surroundingText = GetSurroundingText(range, out int offsetStart);
 
-                // Create RECONVERTSTRING structure from lParam.
+                // Reference RECONVERTSTRING structure from lParam.
                 ref NativeMethods.RECONVERTSTRING reconv = ref Unsafe.AsRef<NativeMethods.RECONVERTSTRING>((void*)lParam);
 
                 reconv.dwSize = requestSize;
@@ -1356,7 +1357,7 @@ namespace System.Windows.Documents
                     _isReconvReady = true;
                 }
 
-                // Copy the string to the pointer right after the structure.
+                // Copy the string to the provided pointer right after the structure.
                 Span<char> reconvertBuffer = new((byte*)lParam + sizeof(NativeMethods.RECONVERTSTRING), surroundingText.Length);
                 surroundingText.CopyTo(reconvertBuffer);
             }
