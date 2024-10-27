@@ -1478,7 +1478,7 @@ namespace System.Windows.Documents
         //
         // WM_IME_REQUEST/IMR_CONFIRMRECONVERTSTRING handler
         //
-        private IntPtr OnWmImeRequest_ConfirmReconvertString(IntPtr lParam, ref bool handled)
+        private unsafe nint OnWmImeRequest_ConfirmReconvertString(nint lParam, ref bool handled)
         {
             if (!IsInKeyboardFocus)
             {
@@ -1490,7 +1490,7 @@ namespace System.Windows.Documents
                 return IntPtr.Zero;
             }
 
-            NativeMethods.RECONVERTSTRING reconv = Marshal.PtrToStructure<NativeMethods.RECONVERTSTRING>(lParam);
+            ref NativeMethods.RECONVERTSTRING reconv = ref Unsafe.AsRef<NativeMethods.RECONVERTSTRING>((void*)lParam);
 
             // If the entire string in RECONVERTSTRING has been changed, we don't handle it.
             if (_reconv.dwStrLen != reconv.dwStrLen)
