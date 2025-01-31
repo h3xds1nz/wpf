@@ -1488,7 +1488,7 @@ namespace System.Windows.Documents
                 return IntPtr.Zero;
             }
 
-            ref NativeMethods.RECONVERTSTRING reconv = ref Unsafe.AsRef<NativeMethods.RECONVERTSTRING>((void*)lParam);
+            ref readonly NativeMethods.RECONVERTSTRING reconv = ref Unsafe.AsRef<NativeMethods.RECONVERTSTRING>((void*)lParam);
 
             // If the entire string in RECONVERTSTRING has been changed, we don't handle it.
             if (_reconv.dwStrLen != reconv.dwStrLen)
