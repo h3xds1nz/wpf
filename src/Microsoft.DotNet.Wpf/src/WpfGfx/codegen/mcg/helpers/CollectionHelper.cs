@@ -407,7 +407,8 @@ namespace MS.Internal.MilCodeGen.Helpers
 
         public static string WriteCollectionSummary(McgResource resource)
         {
-            if (!resource.IsCollection) return String.Empty;
+            if (!resource.IsCollection)
+				return null;
 
             String summary = String.Empty;
 
@@ -436,7 +437,8 @@ namespace MS.Internal.MilCodeGen.Helpers
 
         public static string WriteCollectionConstructors(McgResource resource)
         {
-            if (!resource.IsCollection) return String.Empty;
+            if (!resource.IsCollection)
+				return null;
 
             String type = resource.CollectionType.ManagedName;
 
